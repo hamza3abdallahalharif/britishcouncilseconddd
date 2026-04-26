@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Our Project — British Council</title>
+<link rel="icon" type="image/png" href="hamzabg.png"/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Sans:wght@300;400;500&family=Bebas+Neue&display=swap" rel="stylesheet"/>
+
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --gold:#c9a84c;--gold-light:#f0d080;--gold-dark:#8a6a1e;
+  --deep:#05070f;--navy:#0a0f24;--white:#ffffff;
+  --glass:rgba(201,168,76,.06);--glass-border:rgba(201,168,76,.22);
+}
+html{scroll-behavior:smooth}
+body{background:var(--deep);color:var(--white);font-family:'DM Sans',sans-serif;overflow-x:hidden;cursor:none}
+
+/* ── CURSOR ── */
+#cursor{width:10px;height:10px;background:var(--gold);border-radius:50%;position:fixed;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:width .25s,height .25s,background .25s}
+#cursor-ring{width:38px;height:38px;border:1px solid rgba(201,168,76,.6);border-radius:50%;position:fixed;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:left .1s ease,top .1s ease,width .3s,height .3s,opacity .3s;opacity:.6}
+body.cursor-hover #cursor{width:18px;height:18px;background:var(--gold-light)}
+body.cursor-hover #cursor-ring{width:56px;height:56px;opacity:.35}
+
+/* ── CANVAS ── */
+#starfield{position:fixed;inset:0;z-index:0;pointer-events:none}
+section,nav,footer,.float-nav{position:relative;z-index:1}
+
+/* ── NAV ── */
+.float-nav{position:fixed;top:1.5rem;left:50%;transform:translateX(-50%);z-index:800;display:flex;gap:.3rem;background:rgba(5,7,15,.7);border:1px solid var(--glass-border);border-radius:100px;padding:.4rem .6rem;backdrop-filter:blur(16px);opacity:0;animation:fade-down .8s ease forwards 1.5s}
+@keyframes fade-down{from{opacity:0;transform:translateX(-50%) translateY(-10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+.nav-pill{font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.45);padding:.4rem 1rem;border-radius:100px;cursor:pointer;transition:color .2s,background .2s;border:none;background:transparent;font-family:'DM Sans',sans-serif}
+.nav-pill:hover,.nav-pill.active{color:var(--gold);background:rgba(201,168,76,.1)}
+
+/* ── PROGRESS BAR ── */
+#progress-bar{position:fixed;top:0;left:0;height:2px;background:linear-gradient(90deg,var(--gold-dark),var(--gold),var(--gold-light));z-index:900;width:0%;transition:width .1s linear}
+
+/* ── HERO ── */
+#hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:2rem;overflow:hidden}
+.hero-bg-glow{position:absolute;width:800px;height:800px;background:radial-gradient(circle,rgba(201,168,76,.15) 0%,transparent 65%);top:50%;left:50%;transform:translate(-50%,-50%);animation:pulse-glow 5s ease-in-out infinite;pointer-events:none}
+@keyframes pulse-glow{0%,100%{opacity:.5;transform:translate(-50%,-50%) scale(1)}50%{opacity:1;transform:translate(-50%,-50%) scale(1.18)}}
+.badge{display:inline-block;border:1px solid rgba(201,168,76,.5);color:var(--gold);font-size:.68rem;font-weight:500;letter-spacing:.3em;text-transform:uppercase;padding:.55rem 1.5rem;border-radius:100px;margin-bottom:2.5rem;opacity:0;animation:fade-up 1s ease forwards .4s}
+@keyframes fade-up{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
+.hero-title{font-family:'Playfair Display',serif;font-size:clamp(3.5rem,10vw,9rem);font-weight:900;line-height:.95;letter-spacing:-.02em;background:linear-gradient(135deg,var(--gold-light) 0%,var(--gold) 45%,var(--gold-dark) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;opacity:0;animation:fade-up 1.2s ease forwards .7s}
+.hero-subtitle{font-weight:300;font-size:clamp(1rem,2.2vw,1.3rem);color:rgba(255,255,255,.55);margin-top:1.8rem;max-width:520px;line-height:1.8;opacity:0;animation:fade-up 1.2s ease forwards 1.1s}
+.hero-cta{margin-top:2.5rem;opacity:0;animation:fade-up 1s ease forwards 1.5s;display:flex;gap:1rem;flex-wrap:wrap;justify-content:center}
+.btn-gold{display:inline-flex;align-items:center;gap:.5rem;background:linear-gradient(135deg,var(--gold-dark),var(--gold));color:var(--deep);font-family:'DM Sans',sans-serif;font-weight:500;font-size:.82rem;letter-spacing:.18em;text-transform:uppercase;padding:.85rem 2rem;border-radius:100px;border:none;cursor:pointer;transition:opacity .2s,transform .2s,box-shadow .2s;text-decoration:none}
+.btn-gold:hover{opacity:.88;transform:translateY(-2px);box-shadow:0 12px 40px rgba(201,168,76,.3)}
+.btn-outline{display:inline-flex;align-items:center;gap:.5rem;background:transparent;color:var(--gold);font-family:'DM Sans',sans-serif;font-weight:400;font-size:.82rem;letter-spacing:.18em;text-transform:uppercase;padding:.85rem 2rem;border-radius:100px;border:1px solid rgba(201,168,76,.4);cursor:pointer;transition:border-color .2s,background .2s,transform .2s;text-decoration:none}
+.btn-outline:hover{border-color:rgba(201,168,76,.7);background:rgba(201,168,76,.07);transform:translateY(-2px)}
+.scroll-indicator{position:absolute;bottom:2.5rem;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:.4rem;opacity:0;animation:fade-up 1s ease forwards 2.2s}
+.scroll-indicator span{font-size:.62rem;letter-spacing:.25em;color:var(--gold);text-transform:uppercase}
+.scroll-line{width:1px;height:48px;background:linear-gradient(to bottom,var(--gold),transparent);animation:scroll-drop 1.6s ease-in-out infinite}
+@keyframes scroll-drop{0%{transform:scaleY(0);transform-origin:top;opacity:1}55%{transform:scaleY(1);transform-origin:top;opacity:1}100%{transform:scaleY(1);transform-origin:bottom;opacity:0}}
+
+/* ── SECTIONS ── */
+.section-eyebrow{font-size:.68rem;letter-spacing:.35em;text-transform:uppercase;color:var(--gold);margin-bottom:1.2rem;opacity:0;transition:opacity .7s,transform .7s;transform:translateY(18px)}
+.section-eyebrow.visible{opacity:1;transform:translateY(0)}
+.section-title{font-family:'Playfair Display',serif;font-size:clamp(2rem,5vw,3.8rem);font-weight:700;color:var(--white);max-width:700px;margin:0 auto 1.5rem;line-height:1.15;opacity:0;transition:opacity .7s .12s,transform .7s .12s;transform:translateY(18px)}
+.section-title.visible{opacity:1;transform:translateY(0)}
+.section-title em{font-style:italic;color:var(--gold)}
+.section-body{font-size:clamp(.95rem,1.8vw,1.15rem);color:rgba(255,255,255,.5);max-width:580px;margin:0 auto 4rem;line-height:1.85;opacity:0;transition:opacity .7s .26s,transform .7s .26s;transform:translateY(18px)}
+.section-body.visible{opacity:1;transform:translateY(0)}
+
+/* ── STATS ── */
+#effort{padding:8rem 2rem;text-align:center}
+.stats-grid{display:flex;gap:1.8rem;justify-content:center;flex-wrap:wrap;max-width:920px;margin:0 auto}
+.stat-card{flex:1;min-width:175px;background:var(--glass);border:1px solid var(--glass-border);border-radius:22px;padding:2.5rem 1.5rem;position:relative;overflow:hidden;opacity:0;transform:translateY(28px) scale(.96);transition:opacity .6s,transform .6s,box-shadow .3s}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+.stat-card:hover{box-shadow:0 0 44px rgba(201,168,76,.18);transform:translateY(-5px) scale(1)!important}
+.stat-card.visible{opacity:1;transform:translateY(0) scale(1)}
+.stat-number{font-family:'Bebas Neue',sans-serif;font-size:4rem;color:var(--gold);line-height:1;letter-spacing:.05em}
+.stat-label{font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-top:.5rem}
+.passion-card{background:linear-gradient(135deg,rgba(201,168,76,.16),rgba(201,168,76,.04));border:1px solid rgba(201,168,76,.5);box-shadow:0 0 32px rgba(201,168,76,.1)}
+.passion-card .stat-number{background:linear-gradient(135deg,var(--gold-light),var(--gold),var(--gold-dark));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;background-size:300%;animation:shimmer-anim 2.5s linear infinite}
+@keyframes shimmer-anim{0%{background-position:0%}100%{background-position:300%}}
+.passion-sublabel{font-size:.6rem;color:rgba(201,168,76,.45);letter-spacing:.1em;margin-top:.3rem;font-style:italic}
+.passion-flames{position:absolute;inset:0;pointer-events:none;overflow:hidden;border-radius:22px}
+.flame{position:absolute;bottom:-10px;border-radius:50% 50% 20% 20%;animation:flicker linear infinite;opacity:.45}
+@keyframes flicker{0%{transform:scaleY(1) translateY(0);opacity:.6}30%{transform:scaleY(1.4) translateY(-10px);opacity:.9}70%{transform:scaleY(1.2) translateY(-14px);opacity:.75}100%{transform:scaleY(1) translateY(-22px);opacity:0}}
+
+/* ── DIVIDER ── */
+.ornament-divider{display:flex;align-items:center;justify-content:center;gap:1.5rem;padding:2rem 0;opacity:0;transition:opacity .7s}
+.ornament-divider.visible{opacity:1}
+.ornament-divider::before,.ornament-divider::after{content:'';flex:1;max-width:220px;height:1px;background:linear-gradient(to right,transparent,rgba(201,168,76,.5))}
+.ornament-divider::after{background:linear-gradient(to left,transparent,rgba(201,168,76,.5))}
+.ornament-diamond{width:7px;height:7px;background:var(--gold);transform:rotate(45deg);animation:spin-d 4s linear infinite}
+@keyframes spin-d{to{transform:rotate(405deg)}}
+
+/* ── TIMELINE ── */
+#timeline-section{padding:6rem 2rem;text-align:center}
+.timeline{max-width:700px;margin:3rem auto 0;position:relative}
+.timeline::before{content:'';position:absolute;left:50%;top:0;bottom:0;width:1px;background:linear-gradient(to bottom,transparent,var(--gold),transparent);transform:translateX(-50%)}
+.tl-item{display:flex;gap:2rem;margin-bottom:3rem;align-items:flex-start;opacity:0;transform:translateX(-30px);transition:opacity .6s,transform .6s}
+.tl-item:nth-child(even){flex-direction:row-reverse;transform:translateX(30px)}
+.tl-item.visible{opacity:1;transform:translateX(0)}
+.tl-side{flex:1;text-align:right}
+.tl-item:nth-child(even) .tl-side{text-align:left}
+.tl-dot{width:14px;height:14px;background:var(--gold);border-radius:50%;border:2px solid var(--deep);box-shadow:0 0 12px rgba(201,168,76,.6);flex-shrink:0;margin-top:.35rem;position:relative;z-index:2}
+.tl-title{font-family:'Playfair Display',serif;font-size:1rem;color:var(--white);margin-bottom:.3rem;font-weight:700}
+.tl-desc{font-size:.82rem;color:rgba(255,255,255,.45);line-height:1.6}
+.tl-tag{display:inline-block;font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);border:1px solid rgba(201,168,76,.3);padding:.2rem .7rem;border-radius:100px;margin-bottom:.4rem}
+
+/* ── LETTER ── */
+#letter{padding:6rem 2rem 8rem}
+.letter-wrapper{max-width:780px;margin:0 auto;background:linear-gradient(145deg,rgba(10,15,36,.92),rgba(5,7,15,.97));border:1px solid rgba(201,168,76,.28);border-radius:28px;padding:clamp(2.5rem,6vw,5rem);position:relative;overflow:hidden;opacity:0;transform:translateY(36px);transition:opacity .9s,transform .9s;box-shadow:0 40px 100px rgba(0,0,0,.5)}
+.letter-wrapper.visible{opacity:1;transform:translateY(0)}
+.letter-wrapper::before{content:'';position:absolute;top:-1px;left:10%;right:10%;height:2px;background:linear-gradient(90deg,transparent,var(--gold),var(--gold-light),var(--gold),transparent)}
+.corner-ornament{position:absolute;width:55px;height:55px;opacity:.35}
+.corner-ornament.tl{top:20px;left:20px;border-top:1.5px solid var(--gold);border-left:1.5px solid var(--gold);border-radius:4px 0 0 0}
+.corner-ornament.tr{top:20px;right:20px;border-top:1.5px solid var(--gold);border-right:1.5px solid var(--gold);border-radius:0 4px 0 0}
+.corner-ornament.bl{bottom:20px;left:20px;border-bottom:1.5px solid var(--gold);border-left:1.5px solid var(--gold);border-radius:0 0 0 4px}
+.corner-ornament.br{bottom:20px;right:20px;border-bottom:1.5px solid var(--gold);border-right:1.5px solid var(--gold);border-radius:0 0 4px 0}
+.bc-logo-area{text-align:center;margin-bottom:2.5rem}
+.bc-logo-text{font-size:.62rem;letter-spacing:.4em;text-transform:uppercase;color:var(--gold);margin-bottom:.4rem}
+.bc-name{font-family:'Playfair Display',serif;font-size:clamp(1.4rem,4vw,2.4rem);font-weight:700}
+.bc-name span{color:var(--gold)}
+.letter-date{font-size:.78rem;color:rgba(255,255,255,.3);letter-spacing:.15em;margin-bottom:2rem;text-align:right}
+.letter-salutation{font-family:'Playfair Display',serif;font-size:1.25rem;color:var(--gold-light);margin-bottom:1.5rem;font-style:italic}
+.letter-body{font-size:1rem;line-height:1.95;color:rgba(255,255,255,.72);margin-bottom:1.5rem}
+.letter-body strong{color:var(--white);font-weight:500}
+.letter-body .highlight{color:var(--gold-light);font-family:'Playfair Display',serif;font-style:italic}
+.letter-closing{font-family:'Playfair Display',serif;font-style:italic;color:var(--gold-light);font-size:1.05rem;margin-top:2.5rem}
+
+/* ── TEAM ── */
+#team{padding:6rem 2rem;text-align:center}
+.team-grid{display:flex;gap:1.4rem;justify-content:center;flex-wrap:wrap;max-width:960px;margin:3rem auto 0}
+.team-card{background:var(--glass);border:1px solid var(--glass-border);border-radius:22px;padding:2rem 1.8rem;min-width:180px;flex:1;position:relative;overflow:hidden;opacity:0;transform:translateY(28px);transition:opacity .6s,transform .6s,box-shadow .4s,border-color .4s}
+.team-card:nth-child(1){transition-delay:.05s}.team-card:nth-child(2){transition-delay:.15s}.team-card:nth-child(3){transition-delay:.25s}
+.team-card.visible{opacity:1;transform:translateY(0)}
+.team-card:hover{box-shadow:0 20px 60px rgba(201,168,76,.18);border-color:rgba(201,168,76,.55)}
+.team-card:hover .avatar-ring{transform:scale(1.06)}
+.team-card:hover .avatar-inner{background:linear-gradient(135deg,var(--gold-dark),var(--gold))}
+.avatar-ring{width:72px;height:72px;border-radius:50%;border:1.5px solid var(--gold);display:flex;align-items:center;justify-content:center;margin:0 auto 1.2rem;transition:transform .3s;background:linear-gradient(135deg,rgba(201,168,76,.12),transparent)}
+.avatar-inner{width:54px;height:54px;border-radius:50%;background:linear-gradient(135deg,rgba(201,168,76,.28),rgba(201,168,76,.08));display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--gold-light);font-weight:700;transition:background .4s}
+.team-name{font-family:'Playfair Display',serif;font-size:1rem;font-weight:700;color:var(--white);margin-bottom:.3rem}
+.team-role{font-size:.68rem;letter-spacing:.2em;text-transform:uppercase;color:var(--gold)}
+.team-fun-fact{font-size:.78rem;color:rgba(255,255,255,.38);margin-top:.6rem;line-height:1.5;font-style:italic;min-height:2.5rem}
+.manager-card{max-width:420px;margin:3rem auto 0;background:linear-gradient(135deg,rgba(201,168,76,.12),rgba(201,168,76,.03));border:1px solid rgba(201,168,76,.4);border-radius:22px;padding:2.5rem 2rem;text-align:center;position:relative;opacity:0;transform:translateY(28px);transition:opacity .7s .4s,transform .7s .4s}
+.manager-card.visible{opacity:1;transform:translateY(0)}
+.manager-card::before{content:'Under the Management of';position:absolute;top:-.75rem;left:50%;transform:translateX(-50%);background:var(--deep);padding:0 1rem;font-size:.62rem;letter-spacing:.25em;text-transform:uppercase;color:var(--gold);white-space:nowrap}
+.manager-name{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:700}
+.manager-title{font-size:.72rem;color:rgba(255,255,255,.38);letter-spacing:.2em;text-transform:uppercase;margin-top:.3rem}
+.shimmer-text{background:linear-gradient(90deg,var(--gold-dark),var(--gold-light),var(--gold),var(--gold-dark));background-size:300%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:shimmer-anim 3s linear infinite}
+
+/* ── GALLERY / HIGHLIGHTS ── */
+#highlights{padding:6rem 2rem;text-align:center}
+.highlights-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.2rem;max-width:960px;margin:3rem auto 0}
+.highlight-card{background:var(--glass);border:1px solid var(--glass-border);border-radius:18px;padding:2rem 1.5rem;text-align:left;opacity:0;transform:translateY(22px);transition:opacity .5s,transform .5s,box-shadow .3s}
+.highlight-card.visible{opacity:1;transform:translateY(0)}
+.highlight-card:hover{box-shadow:0 16px 50px rgba(201,168,76,.14);border-color:rgba(201,168,76,.45)}
+.highlight-icon{font-size:1.6rem;margin-bottom:1rem;display:block}
+.highlight-title{font-family:'Playfair Display',serif;font-size:1rem;font-weight:700;color:var(--white);margin-bottom:.4rem}
+.highlight-text{font-size:.82rem;color:rgba(255,255,255,.42);line-height:1.65}
+.highlight-card:nth-child(1){transition-delay:.05s}
+.highlight-card:nth-child(2){transition-delay:.1s}
+.highlight-card:nth-child(3){transition-delay:.15s}
+.highlight-card:nth-child(4){transition-delay:.2s}
+.highlight-card:nth-child(5){transition-delay:.25s}
+.highlight-card:nth-child(6){transition-delay:.3s}
+
+/* ── FEEDBACK ── */
+#feedback-section{padding:6rem 2rem;text-align:center}
+.feedback-box{max-width:680px;margin:3rem auto 0;background:linear-gradient(145deg,rgba(10,15,36,.92),rgba(5,7,15,.97));border:1px solid rgba(201,168,76,.32);border-radius:28px;padding:3rem 2.5rem;position:relative;overflow:hidden;opacity:0;transform:translateY(36px);transition:opacity .9s,transform .9s;box-shadow:0 40px 100px rgba(0,0,0,.5)}
+.feedback-box.visible{opacity:1;transform:translateY(0)}
+.feedback-box::before{content:'';position:absolute;top:-1px;left:10%;right:10%;height:2px;background:linear-gradient(90deg,transparent,var(--gold),var(--gold-light),var(--gold),transparent)}
+
+/* vote buttons */
+.vote-grid{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;margin:1.5rem 0}
+.vote-btn{background:var(--glass);border:1px solid var(--glass-border);border-radius:16px;color:var(--white);font-family:'DM Sans',sans-serif;font-size:.82rem;padding:1.3rem 1.6rem;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:.55rem;min-width:140px;transition:border-color .25s,box-shadow .25s,transform .2s,background .25s}
+.vote-btn:hover{border-color:rgba(201,168,76,.65);box-shadow:0 0 28px rgba(201,168,76,.14);transform:translateY(-3px);background:rgba(201,168,76,.1)}
+.vote-btn.selected{border-color:var(--gold);background:rgba(201,168,76,.15);box-shadow:0 0 32px rgba(201,168,76,.22)}
+.vote-icon{font-size:1.4rem;color:var(--gold)}
+.vote-label{font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.55)}
+
+/* rating stars */
+.star-rating{display:flex;gap:.4rem;justify-content:center;margin:1.2rem 0}
+.star{font-size:1.6rem;color:rgba(255,255,255,.18);cursor:pointer;transition:color .15s,transform .15s}
+.star.lit,.star:hover~.star{color:var(--gold)}
+.star-row:hover .star{color:var(--gold)}
+.star:hover{transform:scale(1.2)}
+
+/* comment textarea */
+.comment-wrap{margin:1.2rem 0}
+.comment-wrap textarea{width:100%;background:rgba(255,255,255,.05);border:1px solid var(--glass-border);border-radius:14px;color:var(--white);font-family:'DM Sans',sans-serif;font-size:.9rem;padding:1rem 1.2rem;resize:vertical;min-height:90px;outline:none;transition:border-color .2s;line-height:1.6}
+.comment-wrap textarea:focus{border-color:rgba(201,168,76,.6)}
+.comment-wrap textarea::placeholder{color:rgba(255,255,255,.25)}
+
+/* name row */
+.name-row{display:flex;gap:.8rem;flex-wrap:wrap;margin:1rem 0}
+.name-row input{flex:1;min-width:180px;background:rgba(255,255,255,.05);border:1px solid var(--glass-border);border-radius:100px;color:var(--white);font-family:'DM Sans',sans-serif;font-size:.88rem;padding:.75rem 1.3rem;outline:none;transition:border-color .2s;text-align:center}
+.name-row input:focus{border-color:rgba(201,168,76,.6)}
+.name-row input::placeholder{color:rgba(255,255,255,.22)}
+
+/* status */
+.fb-status{font-size:.82rem;min-height:1.4rem;margin:.5rem 0;transition:color .3s}
+.fb-status.success{color:rgba(201,168,76,.9)}
+.fb-status.error{color:#e87a7a}
+
+/* send btn */
+.send-btn{display:inline-flex;align-items:center;gap:.6rem;background:linear-gradient(135deg,var(--gold-dark),var(--gold));color:var(--deep);font-family:'DM Sans',sans-serif;font-weight:500;font-size:.82rem;letter-spacing:.2em;text-transform:uppercase;padding:.9rem 2.2rem;border-radius:100px;border:none;cursor:pointer;transition:opacity .2s,transform .2s,box-shadow .2s;margin-top:.5rem}
+.send-btn:hover{opacity:.85;transform:translateY(-2px);box-shadow:0 12px 36px rgba(201,168,76,.3)}
+.send-btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.send-btn svg{width:16px;height:16px;flex-shrink:0}
+
+/* response state */
+#fb-thankyou{display:none;text-align:center;padding:1rem 0}
+.ty-title{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:700;font-style:italic;background:linear-gradient(135deg,var(--gold-light),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:.8rem}
+.ty-body{font-size:.9rem;color:rgba(255,255,255,.5);line-height:1.75}
+.ty-meta{font-size:.75rem;color:rgba(201,168,76,.6);margin-top:1rem;letter-spacing:.1em}
+.reset-link{font-size:.75rem;color:rgba(255,255,255,.3);margin-top:1.2rem;cursor:pointer;text-decoration:underline;display:inline-block;transition:color .2s}
+.reset-link:hover{color:rgba(201,168,76,.7)}
+
+/* ── CHIQUE LOGO ── */
+.chique-logo{object-fit:contain;display:inline-block}
+.chique-logo.hero-logo{width:clamp(75px,13vw,130px);margin-bottom:1.5rem;opacity:0;animation:fade-up 1s ease forwards .15s;filter:drop-shadow(0 0 18px rgba(201,168,76,.45))}
+.chique-logo.badge-logo{width:22px;vertical-align:middle;margin:0 5px;filter:drop-shadow(0 0 5px rgba(201,168,76,.35))}
+.chique-logo.divider-logo{width:38px;filter:drop-shadow(0 0 9px rgba(201,168,76,.4));animation:logo-pulse 3.5s ease-in-out infinite}
+.chique-logo.letter-logo{width:55px;margin-bottom:.8rem;filter:drop-shadow(0 0 10px rgba(201,168,76,.35))}
+.chique-logo.team-logo{width:28px;filter:drop-shadow(0 0 7px rgba(201,168,76,.3))}
+.chique-logo.footer-logo{width:65px;margin-bottom:1.2rem;filter:drop-shadow(0 0 14px rgba(201,168,76,.45));animation:logo-pulse 4s ease-in-out infinite}
+.chique-logo.watermark{position:fixed;bottom:22px;right:22px;width:40px;opacity:.16;z-index:2;pointer-events:none;animation:wm-pulse 5s ease-in-out infinite}
+@keyframes logo-pulse{0%,100%{opacity:.65;transform:scale(1)}50%{opacity:1;transform:scale(1.06)}}
+@keyframes wm-pulse{0%,100%{opacity:.16}50%{opacity:.26}}
+
+/* ── FOOTER ── */
+footer{text-align:center;padding:5rem 2rem 3rem;border-top:1px solid rgba(201,168,76,.1)}
+.footer-tagline{font-family:'Playfair Display',serif;font-size:clamp(1.5rem,4vw,3rem);font-weight:900;font-style:italic;background:linear-gradient(135deg,var(--gold-light),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:1rem}
+.footer-sub{font-size:.75rem;color:rgba(255,255,255,.22);letter-spacing:.2em}
+.footer-links{display:flex;gap:1.5rem;justify-content:center;margin:1.5rem 0;flex-wrap:wrap}
+.footer-links a{font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.3);text-decoration:none;transition:color .2s}
+.footer-links a:hover{color:var(--gold)}
+
+/* ── ORBS ── */
+.orb{position:fixed;border-radius:50%;filter:blur(80px);pointer-events:none;z-index:0;animation:orb-float linear infinite}
+@keyframes orb-float{0%,100%{transform:translateY(0) translateX(0)}33%{transform:translateY(-28px) translateX(18px)}66%{transform:translateY(14px) translateX(-22px)}}
+
+/* ── BURST ── */
+.burst-particle{position:fixed;border-radius:50%;pointer-events:none;z-index:8000}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(10,15,36,.95);border:1px solid rgba(201,168,76,.4);border-radius:100px;padding:.75rem 1.8rem;font-size:.82rem;color:var(--gold);letter-spacing:.1em;z-index:9000;opacity:0;transition:opacity .3s,transform .3s;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ── LOADING SPINNER ── */
+@keyframes spin{to{transform:rotate(360deg)}}
+.spinner{width:16px;height:16px;border:2px solid rgba(5,7,15,.3);border-top-color:var(--deep);border-radius:50%;animation:spin .7s linear infinite;display:none}
+.send-btn.loading .spinner{display:inline-block}
+.send-btn.loading .btn-text{display:none}
+</style>
+</head>
+<body>
+
+<div id="progress-bar"></div>
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+<canvas id="starfield"></canvas>
+<div class="toast" id="toast"></div>
+<img src="hamzabg.png" class="chique-logo watermark" alt=""/>
+<div class="orb" style="width:420px;height:420px;background:rgba(201,168,76,.06);top:-120px;left:-120px;animation-duration:20s"></div>
+<div class="orb" style="width:360px;height:360px;background:rgba(26,58,143,.07);bottom:8%;right:-90px;animation-duration:24s"></div>
+
+<!-- NAV -->
+<nav class="float-nav" id="float-nav">
+  <button class="nav-pill" onclick="scrollTo('#hero')">Home</button>
+  <button class="nav-pill" onclick="scrollTo('#effort')">Stats</button>
+  <button class="nav-pill" onclick="scrollTo('#timeline-section')">Journey</button>
+  <button class="nav-pill" onclick="scrollTo('#letter')">Letter</button>
+  <button class="nav-pill" onclick="scrollTo('#team')">Team</button>
+  <button class="nav-pill" onclick="scrollTo('#highlights')">Highlights</button>
+  <button class="nav-pill" onclick="scrollTo('#feedback-section')">Verdict</button>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-bg-glow"></div>
+  <img src="hamzabg.png" class="chique-logo hero-logo" alt="Chique Logo"/>
+  <div class="badge">
+    <img src="hamzabg.png" class="chique-logo badge-logo" alt=""/>
+    A Labour of Love &nbsp;·&nbsp; British Council 2026
+    <img src="hamzabg.png" class="chique-logo badge-logo" alt=""/>
+  </div>
+  <h1 class="hero-title" id="hero-title">We Poured<br/>Our Hearts<br/>Into This.</h1>
+  <p class="hero-subtitle">Countless hours of dedication, creativity, and teamwork went into every single detail. We hope it leaves you breathless.</p>
+  <div class="hero-cta">
+    <a class="btn-gold" href="#feedback-section" onclick="smoothScroll(event,'#feedback-section')">Share Your Verdict ✦</a>
+    <a class="btn-outline" href="#letter" onclick="smoothScroll(event,'#letter')">Read Our Letter</a>
+  </div>
+  <div class="scroll-indicator">
+    <span>Scroll</span>
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<!-- STATS -->
+<section id="effort">
+  <p class="section-eyebrow observe">The Journey</p>
+  <h2 class="section-title observe">We didn't just build a project —<br/>we <em>lived</em> it.</h2>
+  <p class="section-body observe">Late nights, early mornings, ideas scribbled and rewritten — this is what happens when a team truly cares.</p>
+  <div class="stats-grid">
+    <div class="stat-card observe" data-delay="0"><div class="stat-number" data-count="30">0</div><div class="stat-label">Hours Invested</div></div>
+    <div class="stat-card observe" data-delay="100"><div class="stat-number" data-count="3">0</div><div class="stat-label">Brilliant Minds</div></div>
+    <div class="stat-card observe" data-delay="200"><div class="stat-number" data-count="1">0</div><div class="stat-label">Shared Vision</div></div>
+    <div class="stat-card passion-card observe" data-delay="300">
+      <div class="passion-flames" id="passionFlames"></div>
+      <div class="stat-number" id="passionNum">∞</div>
+      <div class="stat-label">Passion Poured</div>
+      <div class="passion-sublabel">Immeasurable · Boundless · All of Us</div>
+    </div>
+  </div>
+</section>
+
+<!-- DIVIDER -->
+<div class="ornament-divider observe" style="max-width:600px;margin:0 auto;padding:2rem 3rem">
+  <div class="ornament-diamond"></div>
+  <img src="hamzabg.png" class="chique-logo divider-logo" alt=""/>
+  <div class="ornament-diamond"></div>
+</div>
+
+<!-- TIMELINE -->
+<section id="timeline-section">
+  <p class="section-eyebrow observe">How It Happened</p>
+  <h2 class="section-title observe">Our <em>Creative Journey</em></h2>
+  <p class="section-body observe">Every great project has a story. Here is ours.</p>
+  <div class="timeline">
+    <div class="tl-item observe">
+      <div class="tl-side"><span class="tl-tag">Week 1</span><div class="tl-title">The Spark</div><div class="tl-desc">We sat together, dreamed big, and refused to aim for anything ordinary.</div></div>
+      <div class="tl-dot"></div>
+      <div style="flex:1"></div>
+    </div>
+    <div class="tl-item observe" data-delay="80">
+      <div style="flex:1"></div>
+      <div class="tl-dot"></div>
+      <div class="tl-side"><span class="tl-tag">Week 2</span><div class="tl-title">Research & Planning</div><div class="tl-desc">Deep dives, late-night notes, and countless revised outlines before a single word was written.</div></div>
+    </div>
+    <div class="tl-item observe" data-delay="160">
+      <div class="tl-side"><span class="tl-tag">Week 3</span><div class="tl-title">Building & Creating</div><div class="tl-desc">The real work began — disagreements, breakthroughs, and everything in between.</div></div>
+      <div class="tl-dot"></div>
+      <div style="flex:1"></div>
+    </div>
+    <div class="tl-item observe" data-delay="240">
+      <div style="flex:1"></div>
+      <div class="tl-dot"></div>
+      <div class="tl-side"><span class="tl-tag">Final Days</span><div class="tl-title">The Polish</div><div class="tl-desc">Every detail reviewed, every sentence refined. Nothing left to chance.</div></div>
+    </div>
+    <div class="tl-item observe" data-delay="320">
+      <div class="tl-side"><span class="tl-tag">Today</span><div class="tl-title">We Present It to You</div><div class="tl-desc">With pride, sincerity, and our whole hearts — to the British Council.</div></div>
+      <div class="tl-dot" style="background:var(--gold-light);box-shadow:0 0 20px rgba(240,208,128,.7)"></div>
+      <div style="flex:1"></div>
+    </div>
+  </div>
+</section>
+
+<!-- DIVIDER -->
+<div class="ornament-divider observe" style="max-width:600px;margin:0 auto;padding:2rem 3rem">
+  <div class="ornament-diamond"></div>
+  <img src="hamzabg.png" class="chique-logo divider-logo" alt=""/>
+  <div class="ornament-diamond"></div>
+</div>
+
+<!-- LETTER -->
+<section id="letter">
+  <p class="section-eyebrow observe" style="text-align:center">Official Note</p>
+  <h2 class="section-title observe" style="text-align:center">A Message to the<br/><em>British Council</em></h2>
+  <div class="letter-wrapper observe">
+    <div class="corner-ornament tl"></div><div class="corner-ornament tr"></div>
+    <div class="corner-ornament bl"></div><div class="corner-ornament br"></div>
+    <div class="bc-logo-area">
+      <img src="hamzabg.png" class="chique-logo letter-logo" alt=""/><br/>
+      <div class="bc-logo-text">Addressed to</div>
+      <div class="bc-name">The <span>British Council</span></div>
+    </div>
+    <div class="letter-date">Cairo, Egypt — 2026</div>
+    <div class="letter-salutation">Dear British Council,</div>
+    <p class="letter-body">It is with immense pride and heartfelt sincerity that we present to you this project — the result of <strong>extraordinary dedication, sleepless nights, and an unwavering commitment to excellence.</strong></p>
+    <p class="letter-body">This was not simply an academic exercise. It was a journey of growth, collaboration, and <span class="highlight">genuine passion for what we believe in.</span> We challenged ourselves at every turn, pushed beyond our comfort zones, and refused to settle for anything less than our very best.</p>
+    <p class="letter-body">We placed <strong>our full hearts and minds</strong> into every detail — from the first brainstorming session to the final touch — because we believe that the work we put out into the world should reflect who we truly are.</p>
+    <p class="letter-body"><span class="highlight">May this work inspire, impress, and above all — amaze you.</span> We are deeply honoured to share it with an institution of your distinction, and we are grateful for the platform and opportunity you have provided us.</p>
+    <p class="letter-body">With great respect and gratitude,</p>
+    <div class="letter-closing">The Project Team<br/><small style="font-size:.78rem;color:rgba(255,255,255,.3);letter-spacing:.15em">Under the management of Mr. Ahmad Fawzy</small></div>
+  </div>
+</section>
+
+<!-- TEAM -->
+<section id="team">
+  <p class="section-eyebrow observe">The People Behind It</p>
+  <h2 class="section-title observe">Meet the <em>Makers</em></h2>
+  <p class="section-body observe" style="display:flex;align-items:center;justify-content:center;gap:10px">
+    <img src="hamzabg.png" class="chique-logo team-logo" alt=""/>
+    Three individuals. One shared dream. An unforgettable project.
+    <img src="hamzabg.png" class="chique-logo team-logo" alt=""/>
+  </p>
+  <div class="team-grid">
+    <div class="team-card observe">
+      <div class="avatar-ring"><div class="avatar-inner">H</div></div>
+      <div class="team-name">Hamza Al Sharif</div>
+      <div class="team-role">Team Member</div>
+      <div class="team-fun-fact">The one who never let the team settle for good enough.</div>
+    </div>
+    <div class="team-card observe">
+      <div class="avatar-ring"><div class="avatar-inner">A</div></div>
+      <div class="team-name">Abdelwahab El Tobgy</div>
+      <div class="team-role">Team Member</div>
+      <div class="team-fun-fact">Brought the ideas that made everyone stop and say "yes, that."</div>
+    </div>
+    <div class="team-card observe">
+      <div class="avatar-ring"><div class="avatar-inner">Y</div></div>
+      <div class="team-name">Youssef Soliman</div>
+      <div class="team-role">Team Member</div>
+      <div class="team-fun-fact">The calm voice of reason when creativity got beautifully chaotic.</div>
+    </div>
+  </div>
+  <div class="manager-card observe">
+    <div class="avatar-ring" style="margin:0 auto 1.2rem;width:78px;height:78px"><div class="avatar-inner" style="width:58px;height:58px;font-size:1.4rem">AF</div></div>
+    <div class="manager-name shimmer-text">Mr. Ahmad Fawzy</div>
+    <div class="manager-title">Project Manager &amp; Mentor</div>
+  </div>
+</section>
+
+<!-- HIGHLIGHTS -->
+<section id="highlights">
+  <p class="section-eyebrow observe">What We're Proud Of</p>
+  <h2 class="section-title observe">Project <em>Highlights</em></h2>
+  <p class="section-body observe">The moments and decisions that defined this work.</p>
+  <div class="highlights-grid">
+    <div class="highlight-card observe"><span class="highlight-icon">🎯</span><div class="highlight-title">Clear Vision</div><div class="highlight-text">From day one we had a single north star — make something worth remembering.</div></div>
+    <div class="highlight-card observe"><span class="highlight-icon">🤝</span><div class="highlight-title">Real Collaboration</div><div class="highlight-text">Every decision was made together, every voice heard and considered.</div></div>
+    <div class="highlight-card observe"><span class="highlight-icon">📚</span><div class="highlight-title">Deep Research</div><div class="highlight-text">We went far beyond the brief — reading, questioning, and exploring every angle.</div></div>
+    <div class="highlight-card observe"><span class="highlight-icon">✨</span><div class="highlight-title">Attention to Detail</div><div class="highlight-text">The small things are what separate good from great. We obsessed over them.</div></div>
+    <div class="highlight-card observe"><span class="highlight-icon">🚀</span><div class="highlight-title">Pushing Boundaries</div><div class="highlight-text">We tried new approaches, challenged assumptions, and embraced the unknown.</div></div>
+    <div class="highlight-card observe"><span class="highlight-icon">💛</span><div class="highlight-title">Made With Heart</div><div class="highlight-text">More than skills — we put genuine love and care into every single element.</div></div>
+  </div>
+</section>
+
+<!-- DIVIDER -->
+<div class="ornament-divider observe" style="max-width:600px;margin:0 auto;padding:2rem 3rem">
+  <div class="ornament-diamond"></div>
+  <img src="hamzabg.png" class="chique-logo divider-logo" alt=""/>
+  <div class="ornament-diamond"></div>
+</div>
+
+<!-- FEEDBACK -->
+<section id="feedback-section">
+  <p class="section-eyebrow observe">Your Verdict</p>
+  <h2 class="section-title observe">Did You Love Our<br/><em>Scratch Project?</em></h2>
+  <p class="section-body observe">We poured everything into it — we'd be honoured to know what you thought.</p>
+
+  <div class="feedback-box observe">
+
+    <div id="fb-form">
+      <!-- Step 1: Vote -->
+      <p style="font-size:.72rem;letter-spacing:.25em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:.5rem">Your overall feeling</p>
+      <div class="vote-grid">
+        <button class="vote-btn" id="vb-absolutely" onclick="selectVote('absolutely',this)">
+          <span class="vote-icon">✦</span>
+          <span class="vote-label">Absolutely loved it</span>
+        </button>
+        <button class="vote-btn" id="vb-yes" onclick="selectVote('yes',this)">
+          <span class="vote-icon">◈</span>
+          <span class="vote-label">Yes, it was great</span>
+        </button>
+        <button class="vote-btn" id="vb-good" onclick="selectVote('good',this)">
+          <span class="vote-icon">◇</span>
+          <span class="vote-label">It was good</span>
+        </button>
+      </div>
+
+      <!-- Step 2: Stars -->
+      <p style="font-size:.72rem;letter-spacing:.25em;text-transform:uppercase;color:rgba(255,255,255,.35);margin:.8rem 0 .2rem">Rate out of 5</p>
+      <div class="star-rating star-row" id="star-row">
+        <span class="star" data-v="1" onclick="setStars(1)">★</span>
+        <span class="star" data-v="2" onclick="setStars(2)">★</span>
+        <span class="star" data-v="3" onclick="setStars(3)">★</span>
+        <span class="star" data-v="4" onclick="setStars(4)">★</span>
+        <span class="star" data-v="5" onclick="setStars(5)">★</span>
+      </div>
+
+      <!-- Step 3: Comment -->
+      <p style="font-size:.72rem;letter-spacing:.25em;text-transform:uppercase;color:rgba(255,255,255,.35);margin:.8rem 0 .4rem">Leave a message (optional)</p>
+      <div class="comment-wrap">
+        <textarea id="fb-comment" placeholder="Share your thoughts with the team…" maxlength="400"></textarea>
+      </div>
+
+      <!-- Step 4: Name -->
+      <div class="name-row">
+        <input type="text" id="fb-name" placeholder="Your name…" maxlength="60"/>
+        <input type="text" id="fb-role" placeholder="Your role (e.g. Judge)…" maxlength="60"/>
+      </div>
+
+      <div class="fb-status" id="fb-status"></div>
+
+      <button class="send-btn" id="send-btn" onclick="submitFeedback()">
+        <span class="btn-text">Send Feedback ✦</span>
+        <span class="spinner"></span>
+      </button>
+    </div>
+
+    <div id="fb-thankyou">
+      <div class="ty-title" id="ty-title">Thank you from the bottom of our hearts.</div>
+      <p class="ty-body" id="ty-body"></p>
+      <div class="ty-meta" id="ty-meta"></div>
+      <span class="reset-link" onclick="resetFeedback()">Submit another response</span>
+    </div>
+
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <img src="hamzabg.png" class="chique-logo footer-logo" alt=""/><br/>
+  <div class="footer-tagline">We hope it amazes you.</div>
+  <div class="footer-links">
+    <a href="#hero" onclick="smoothScroll(event,'#hero')">Back to Top</a>
+    <a href="#feedback-section" onclick="smoothScroll(event,'#feedback-section')">Leave Feedback</a>
+    <a href="mailto:hamza3abdallahalsharif@gmail.com">Contact the Team</a>
+  </div>
+  <div class="footer-sub">✦ British Council Project 2026 — Made with every ounce of dedication ✦</div>
+</footer>
+
+<script>
+(function(){
+/* ─── FormSubmit.co — zero config, no signup needed ─── */
+const FORM_ENDPOINT = 'https://formsubmit.co/ajax/hamza3abdallahalsharif@gmail.com';
+
+/* ─── CURSOR ─── */
+const cur=document.getElementById('cursor'),ring=document.getElementById('cursor-ring');
+let mx=-100,my=-100;
+document.addEventListener('mousemove',e=>{
+  mx=e.clientX;my=e.clientY;
+  cur.style.left=mx+'px';cur.style.top=my+'px';
+});
+setInterval(()=>{ring.style.left=mx+'px';ring.style.top=my+'px';},50);
+document.querySelectorAll('.team-card,.stat-card,.letter-wrapper,.feedback-box,.highlight-card,.vote-btn').forEach(el=>{
+  el.addEventListener('mouseenter',()=>document.body.classList.add('cursor-hover'));
+  el.addEventListener('mouseleave',()=>document.body.classList.remove('cursor-hover'));
+});
+
+/* ─── PROGRESS BAR ─── */
+window.addEventListener('scroll',()=>{
+  const pct=(window.scrollY/(document.body.scrollHeight-window.innerHeight))*100;
+  document.getElementById('progress-bar').style.width=pct+'%';
+  updateNav();
+});
+
+/* ─── ACTIVE NAV ─── */
+function updateNav(){
+  const sections=['hero','effort','timeline-section','letter','team','highlights','feedback-section'];
+  const pills=document.querySelectorAll('.nav-pill');
+  let active=0;
+  sections.forEach((id,i)=>{
+    const el=document.getElementById(id);
+    if(el&&window.scrollY>=el.offsetTop-200)active=i;
+  });
+  pills.forEach((p,i)=>p.classList.toggle('active',i===active));
+}
+
+/* ─── SMOOTH SCROLL ─── */
+window.scrollTo=function(sel){
+  const el=document.querySelector(sel);
+  if(el)el.scrollIntoView({behavior:'smooth'});
+};
+window.smoothScroll=function(e,sel){
+  e.preventDefault();
+  window.scrollTo(sel);
+};
+
+/* ─── STARFIELD ─── */
+const canvas=document.getElementById('starfield'),ctx=canvas.getContext('2d');
+function resizeC(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
+resizeC();window.addEventListener('resize',resizeC);
+const stars=Array.from({length:200},()=>({
+  x:Math.random()*canvas.width,y:Math.random()*canvas.height,
+  r:Math.random()*1.4+.2,alpha:Math.random(),
+  speed:Math.random()*.3+.04,twinkle:Math.random()*Math.PI*2
+}));
+function drawStars(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  stars.forEach(s=>{
+    s.twinkle+=.022;s.alpha=.25+Math.sin(s.twinkle)*.55;
+    s.y-=s.speed;if(s.y<0){s.y=canvas.height;s.x=Math.random()*canvas.width;}
+    ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+    ctx.fillStyle=`rgba(201,168,76,${Math.max(0,s.alpha)})`;ctx.fill();
+  });
+  requestAnimationFrame(drawStars);
+}
+drawStars();
+
+/* ─── PASSION FLAMES ─── */
+const fc=document.getElementById('passionFlames');
+const fcols=['#f0d080','#c9a84c','#e8b84b','#fff0a0','#8a6a1e'];
+for(let i=0;i<18;i++){
+  const f=document.createElement('div');f.className='flame';
+  f.style.cssText=`left:${5+Math.random()*90}%;height:${18+Math.random()*28}px;width:${4+Math.random()*5}px;background:${fcols[i%5]};animation-duration:${.7+Math.random()}s;animation-delay:${Math.random()*.8}s`;
+  fc.appendChild(f);
+}
+
+/* ─── PASSION PULSE ─── */
+const pn=document.getElementById('passionNum');
+const pstates=['∞','∞∞','∞ ∞ ∞','♾ ∞ ♾','∞'];let pi=0;
+setInterval(()=>{
+  pi=(pi+1)%pstates.length;
+  pn.style.opacity='0';
+  setTimeout(()=>{pn.textContent=pstates[pi];pn.style.opacity='1';},200);
+  pn.style.transition='opacity .2s';
+},1900);
+
+/* ─── INTERSECTION OBSERVER ─── */
+const obs=new IntersectionObserver(entries=>{
+  entries.forEach(entry=>{
+    if(!entry.isIntersecting)return;
+    const el=entry.target;
+    setTimeout(()=>{
+      el.classList.add('visible');
+      if(el.classList.contains('stat-card')){
+        const num=el.querySelector('[data-count]');
+        if(num)animCount(num,parseInt(num.dataset.count));
+      }
+    },parseInt(el.dataset.delay||0));
+  });
+},{threshold:.12});
+document.querySelectorAll('.observe').forEach(el=>obs.observe(el));
+
+/* ─── COUNT UP ─── */
+function animCount(el,target){
+  let v=0;const step=target/(1600/16);
+  const t=setInterval(()=>{
+    v+=step;if(v>=target){v=target;clearInterval(t);}
+    el.textContent=Math.floor(v)+(target>1?'+':'');
+  },16);
+}
+
+/* ─── PARALLAX HERO ─── */
+window.addEventListener('scroll',()=>{
+  const t=document.getElementById('hero-title');
+  if(t)t.style.transform=`translateY(${window.scrollY*.22}px)`;
+});
+
+/* ─── PARTICLE BURST ─── */
+document.addEventListener('click',e=>{
+  const cols=['#c9a84c','#f0d080','#8a6a1e','#ffffff','#1a3a8f'];
+  for(let i=0;i<14;i++){
+    const p=document.createElement('div');p.className='burst-particle';
+    const sz=4+Math.random()*5;
+    p.style.cssText=`left:${e.clientX}px;top:${e.clientY}px;background:${cols[Math.floor(Math.random()*5)]};width:${sz}px;height:${sz}px;transform:translate(-50%,-50%)`;
+    document.body.appendChild(p);
+    const a=Math.random()*Math.PI*2,d=40+Math.random()*80;
+    p.animate([
+      {transform:'translate(-50%,-50%) scale(1)',opacity:1},
+      {transform:`translate(calc(-50% + ${Math.cos(a)*d}px),calc(-50% + ${Math.sin(a)*d}px)) scale(0)`,opacity:0}
+    ],{duration:500+Math.random()*300,easing:'cubic-bezier(0,0.9,0.57,1)'}).onfinish=()=>p.remove();
+  }
+});
+
+/* ─── TOAST ─── */
+function showToast(msg,dur=3000){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),dur);
+}
+
+/* ─── FEEDBACK STATE ─── */
+let chosenVote='',chosenStars=0;
+
+window.selectVote=function(val,btn){
+  chosenVote=val;
+  document.querySelectorAll('.vote-btn').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
+};
+
+window.setStars=function(n){
+  chosenStars=n;
+  document.querySelectorAll('.star').forEach((s,i)=>{
+    s.classList.toggle('lit',i<n);
+  });
+};
+
+/* ─── SUBMIT FEEDBACK ─── */
+window.submitFeedback=async function(){
+  const name=(document.getElementById('fb-name').value.trim()||'Anonymous');
+  const role=(document.getElementById('fb-role').value.trim()||'Guest');
+  const comment=(document.getElementById('fb-comment').value.trim()||'No message left.');
+  const statusEl=document.getElementById('fb-status');
+  const btn=document.getElementById('send-btn');
+
+  if(!chosenVote){
+    statusEl.textContent='Please select how you felt about the project.';
+    statusEl.className='fb-status error';
+    showToast('Please pick a vote first ✦');
+    return;
+  }
+
+  const voteLabels={absolutely:'Absolutely loved it',yes:'Yes, it was great',good:'It was good'};
+  const starsText=chosenStars>0?`${chosenStars}/5 stars`:'No star rating given';
+
+  btn.classList.add('loading');
+  btn.disabled=true;
+  statusEl.textContent='Sending your feedback…';
+  statusEl.className='fb-status';
+
+  const payload={
+    _subject: `[British Council Feedback] ${voteLabels[chosenVote]} — from ${name}`,
+    _captcha: 'false',
+    _template: 'table',
+    Name: name,
+    Role: role,
+    Verdict: voteLabels[chosenVote],
+    Rating: starsText,
+    Message: comment
+  };
+
+  try {
+    const res = await fetch(FORM_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    if(data.success === 'true' || data.success === true){
+      showSuccess(name, voteLabels[chosenVote], starsText, comment);
+    } else {
+      throw new Error('FormSubmit returned failure');
+    }
+  } catch(err) {
+    /* Hard fallback — open mail client with everything pre-filled */
+    const subj = encodeURIComponent(`[British Council Feedback] ${voteLabels[chosenVote]} — from ${name}`);
+    const body = encodeURIComponent(
+      `Name: ${name}\nRole: ${role}\nVerdict: ${voteLabels[chosenVote]}\nRating: ${starsText}\n\nMessage:\n${comment}\n\n— Sent from the British Council Project page`
+    );
+    window.location.href = `mailto:hamza3abdallahalsharif@gmail.com?subject=${subj}&body=${body}`;
+    showSuccess(name, voteLabels[chosenVote], starsText, comment);
+  } finally {
+    btn.classList.remove('loading');
+    btn.disabled=false;
+  }
+};
+
+function showSuccess(name,vote,stars,comment){
+  document.getElementById('fb-form').style.display='none';
+  const ty=document.getElementById('fb-thankyou');
+  ty.style.display='block';
+  const responses={
+    'Absolutely loved it':'That fills our hearts completely. Every sleepless night, every rewrite — it was all worth it.',
+    'Yes, it was great':'We are so glad to hear it. Your appreciation means the world to a team that gave everything.',
+    'It was good':'Thank you for your honesty. We will keep pushing and keep improving with every project.'
+  };
+  document.getElementById('ty-title').textContent=`Thank you, ${name}.`;
+  document.getElementById('ty-body').textContent=responses[vote]||'Your words mean everything to us.';
+  document.getElementById('ty-meta').textContent=`Verdict: ${vote} · ${stars}${comment!=='—'?' · Message received':''}`;
+  showToast('✦ Feedback received — thank you!');
+}
+
+window.resetFeedback=function(){
+  chosenVote='';chosenStars=0;
+  document.querySelectorAll('.vote-btn').forEach(b=>b.classList.remove('selected'));
+  document.querySelectorAll('.star').forEach(s=>s.classList.remove('lit'));
+  document.getElementById('fb-name').value='';
+  document.getElementById('fb-role').value='';
+  document.getElementById('fb-comment').value='';
+  document.getElementById('fb-status').textContent='';
+  document.getElementById('fb-status').className='fb-status';
+  document.getElementById('fb-form').style.display='block';
+  document.getElementById('fb-thankyou').style.display='none';
+};
+
+})();
+</script>
+<form action="https://formsubmit.co/hamza3abdallahalsharif@gmail.com" method="POST" />
+<input type="email" name="email">
+
+
+</body>
+</html>
